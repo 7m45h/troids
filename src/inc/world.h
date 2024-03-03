@@ -17,3 +17,5 @@ struct World
 };
 
 struct World* world_form(const char* title, float w, float h);
+void world_evolve(struct World* world);
+void world_free(struct World* world);
