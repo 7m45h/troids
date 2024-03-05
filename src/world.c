@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include "inc/logger.h"
+#include "inc/troid.h"
 #include "inc/world.h"
 
 static void world_handle_events(struct World* world)
@@ -27,6 +28,17 @@ static void world_handle_events(struct World* world)
       {
         case SDLK_q:
         world->evolving = false;
+        break;
+      }
+      break;
+
+      case SDL_WINDOWEVENT:
+      switch (world->event.window.event)
+      {
+        case SDL_WINDOWEVENT_RESIZED:
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+        world->window_w = world->event.window.data1;
+        world->window_h = world->event.window.data2;
         break;
       }
       break;
@@ -92,6 +104,18 @@ struct World* world_form(const char* title, float w, float h)
     return NULL;
   }
 
+  int troid_status = troid_init(world->renderer);
+  if (troid_status != 0)
+  {
+    logger(ERROR, __FILE_NAME__, __LINE__, "troid init failed");
+    SDL_DestroyRenderer(world->renderer);
+    SDL_DestroyWindow(world->window);
+    free(world);
+    IMG_Quit();
+    SDL_Quit();
+    return NULL;
+  }
+
   world->evolving = false;
 
   return world;
@@ -110,6 +134,8 @@ void world_evolve(struct World* world)
 
 void world_free(struct World* world)
 {
+  troid_deinit();
+
   SDL_DestroyRenderer(world->renderer);
   SDL_DestroyWindow(world->window);
   free(world);
