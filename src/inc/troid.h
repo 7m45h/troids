@@ -13,4 +13,6 @@ struct Troid
 };
 
 int troid_init(SDL_Renderer* renderer);
+struct Troid* troid_new(float _x, float _y);
+void troid_free(struct Troid* troid);
 void troid_deinit(void);

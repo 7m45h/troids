@@ -6,6 +6,8 @@
 #include <SDL2/SDL_video.h>
 #include <stdbool.h>
 
+#include "quadtree.h"
+
 struct World
 {
   float window_w;
@@ -14,6 +16,8 @@ struct World
   SDL_Renderer* renderer;
   SDL_Event event;
   bool evolving;
+
+  struct Quadtree* qt;
 };
 
 struct World* world_form(const char* title, float w, float h);

@@ -10,8 +10,37 @@
 #include <stdlib.h>
 
 #include "inc/logger.h"
+#include "inc/quadtree.h"
 #include "inc/troid.h"
 #include "inc/world.h"
+
+static bool world_init(struct World* world)
+{
+  world->qt = qt_new(0, 0, world->window_w, world->window_h);
+  if (world->qt == NULL)
+  {
+    logger(ERROR, __FILE_NAME__, __LINE__, "qt_new returned NULL");
+    return false;
+  }
+
+  int troid_status = troid_init(world->renderer);
+  if (troid_status != 0)
+  {
+    logger(ERROR, __FILE_NAME__, __LINE__, "troid init failed");
+    return false;
+  }
+
+  return true;
+}
+
+static void world_deinit(struct World* world)
+{
+  troid_deinit();
+  if (world->qt != NULL)
+  {
+    qt_free(world->qt);
+  }
+}
 
 static void world_handle_events(struct World* world)
 {
@@ -48,8 +77,10 @@ static void world_handle_events(struct World* world)
 
 static void world_render(struct World* world)
 {
-  SDL_SetRenderDrawColor(world->renderer, 0xff, 0xff, 0xff, SDL_ALPHA_OPAQUE);
+  SDL_SetRenderDrawColor(world->renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
   SDL_RenderClear(world->renderer);
+
+  qt_render(world->qt, world->renderer);
 
   SDL_RenderPresent(world->renderer);
 }
@@ -104,18 +135,6 @@ struct World* world_form(const char* title, float w, float h)
     return NULL;
   }
 
-  int troid_status = troid_init(world->renderer);
-  if (troid_status != 0)
-  {
-    logger(ERROR, __FILE_NAME__, __LINE__, "troid init failed");
-    SDL_DestroyRenderer(world->renderer);
-    SDL_DestroyWindow(world->window);
-    free(world);
-    IMG_Quit();
-    SDL_Quit();
-    return NULL;
-  }
-
   world->evolving = false;
 
   return world;
@@ -123,19 +142,19 @@ struct World* world_form(const char* title, float w, float h)
 
 void world_evolve(struct World* world)
 {
-  world->evolving = true;
+  world->evolving = world_init(world);
 
   while (world->evolving)
   {
     world_handle_events(world);
     world_render(world);
   }
+
+  world_deinit(world);
 }
 
 void world_free(struct World* world)
 {
-  troid_deinit();
-
   SDL_DestroyRenderer(world->renderer);
   SDL_DestroyWindow(world->window);
   free(world);
