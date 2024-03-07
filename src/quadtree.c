@@ -15,6 +15,34 @@ static const int quad_safe_offset_double = quad_safe_offset * 2;
 // static const int quad_min_w = TROID_WIDTH * 4;
 // static const int quad_min_h = TROID_HEIGHT * 4;
 
+static void qt_set_quad_size(struct Quadtree* qt, float _x, float _y, float _w, float _h)
+{
+  qt->real_dim.x = _x;
+  qt->real_dim.y = _y;
+  qt->real_dim.w = _w;
+  qt->real_dim.h = _h;
+
+  qt->safe_dim.x = _x - quad_safe_offset;
+  qt->safe_dim.y = _y - quad_safe_offset;
+  qt->safe_dim.w = _w + quad_safe_offset_double;
+  qt->safe_dim.h = _h + quad_safe_offset_double;
+}
+
+static void qt_resize(struct Quadtree* qt, float _x, float _y, float _w, float _h)
+{
+  qt_set_quad_size(qt, _x, _y, _w, _h);
+  if (qt->divided)
+  {
+    float half_w = qt->real_dim.w * 0.5;
+    float half_h = qt->real_dim.h * 0.5;
+
+    qt_resize(qt->nw, qt->real_dim.x,          qt->real_dim.y,          half_w, half_h);
+    qt_resize(qt->ne, qt->real_dim.x + half_w, qt->real_dim.y,          half_w, half_h);
+    qt_resize(qt->sw, qt->real_dim.x,          qt->real_dim.y + half_h, half_w, half_h);
+    qt_resize(qt->se, qt->real_dim.x + half_w, qt->real_dim.y + half_h, half_w, half_h);
+  }
+}
+
 static bool qt_add_to_branch(struct Quadtree* qt, struct Troid* troid)
 {
   if (qt_add(qt->nw, troid)) return true;
@@ -22,6 +50,42 @@ static bool qt_add_to_branch(struct Quadtree* qt, struct Troid* troid)
   if (qt_add(qt->sw, troid)) return true;
   if (qt_add(qt->se, troid)) return true;
   return false;
+}
+
+static void qt_rearrange(struct Quadtree* qt, struct Quadtree* qt_root)
+{
+  struct Troid* crnt_troid = qt->troids;
+  struct Troid* next_troid = NULL;
+  qt->troids = NULL;
+
+  while (crnt_troid != NULL)
+  {
+    next_troid = crnt_troid->next;
+    crnt_troid->next = NULL;
+
+    if (SDL_PointInFRect(&crnt_troid->pos, &qt->safe_dim))
+    {
+      qt_add(qt, crnt_troid);
+    }
+    else
+    {
+      if(!qt_add(qt_root, crnt_troid))
+      {
+        logger(ERROR, __FILE_NAME__, __LINE__, "troid not accepted by root quad");
+        troid_free(crnt_troid);
+      }
+    }
+
+    crnt_troid = next_troid;
+  }
+
+  if (qt->divided)
+  {
+    qt_rearrange(qt->nw, qt_root);
+    qt_rearrange(qt->ne, qt_root);
+    qt_rearrange(qt->sw, qt_root);
+    qt_rearrange(qt->se, qt_root);
+  }
 }
 
 static bool qt_divid(struct Quadtree* qt)
@@ -71,15 +135,7 @@ struct Quadtree* qt_new(float _x, float _y, float _w, float _h)
     return NULL;
   }
 
-  qt->real_dim.x = _x;
-  qt->real_dim.y = _y;
-  qt->real_dim.w = _w;
-  qt->real_dim.h = _h;
-
-  qt->safe_dim.x = _x - quad_safe_offset;
-  qt->safe_dim.y = _y - quad_safe_offset;
-  qt->safe_dim.w = _w + quad_safe_offset_double;
-  qt->safe_dim.h = _h + quad_safe_offset_double;
+  qt_set_quad_size(qt, _x, _y, _w, _h);
 
   qt->troids = NULL;
 
@@ -90,6 +146,12 @@ struct Quadtree* qt_new(float _x, float _y, float _w, float _h)
   qt->se      = NULL;
 
   return qt;
+}
+
+void qt_handle_window_resize(struct Quadtree* qt_root, float ww, float wh)
+{
+  qt_resize(qt_root, 0, 0, ww, wh);
+  qt_rearrange(qt_root, qt_root);
 }
 
 bool qt_add(struct Quadtree* qt, struct Troid* troid)
@@ -121,6 +183,36 @@ bool qt_add(struct Quadtree* qt, struct Troid* troid)
   logger(ERROR, __FILE_NAME__, __LINE__, "troid not accepted");
   troid_free(troid);
   return true;
+}
+
+void qt_update(struct Quadtree* qt)
+{
+  if (qt->divided)
+  {
+    qt_update(qt->nw);
+    qt_update(qt->ne);
+    qt_update(qt->sw);
+    qt_update(qt->se);
+
+    if (
+      qt->nw->troids == NULL && !qt->nw->divided &&
+      qt->ne->troids == NULL && !qt->ne->divided &&
+      qt->sw->troids == NULL && !qt->sw->divided &&
+      qt->se->troids == NULL && !qt->se->divided
+    )
+    {
+      qt_free(qt->nw);
+      qt_free(qt->ne);
+      qt_free(qt->sw);
+      qt_free(qt->se);
+
+      qt->divided = false;
+      qt->nw      = NULL;
+      qt->ne      = NULL;
+      qt->sw      = NULL;
+      qt->se      = NULL;
+    }
+  }
 }
 
 void qt_render(struct Quadtree* qt, SDL_Renderer* renderer)

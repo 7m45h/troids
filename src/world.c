@@ -65,6 +65,7 @@ static void world_handle_events(struct World* world)
         case SDL_WINDOWEVENT_SIZE_CHANGED:
         world->window_w = world->event.window.data1;
         world->window_h = world->event.window.data2;
+        qt_handle_window_resize(world->qt, world->window_w, world->window_h);
         break;
       }
       break;
@@ -157,6 +158,7 @@ void world_evolve(struct World* world)
   while (world->evolving)
   {
     world_handle_events(world);
+    qt_update(world->qt);
     world_render(world);
   }
 
