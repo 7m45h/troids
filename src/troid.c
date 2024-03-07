@@ -56,7 +56,7 @@ struct Troid* troid_append(struct Troid* head, struct Troid* new_troid)
 {
   if (new_troid == NULL)
   {
-    logger(ERROR, __FILE_NAME__, __LINE__, "recived NULL for append");
+    // logger(ERROR, __FILE_NAME__, __LINE__, "recived NULL for append");
     return head;
   }
 

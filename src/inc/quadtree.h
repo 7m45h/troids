@@ -12,6 +12,7 @@ struct Quadtree
   SDL_FRect real_dim;
   SDL_FRect safe_dim;
   struct Troid* troids;
+  int len;
   bool divided;
   struct Quadtree* nw;
   struct Quadtree* ne;

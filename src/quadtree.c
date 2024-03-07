@@ -12,8 +12,9 @@
 static const int quad_safe_offset        = 5;
 static const int quad_safe_offset_double = quad_safe_offset * 2;
 
-// static const int quad_min_w = TROID_WIDTH * 4;
-// static const int quad_min_h = TROID_HEIGHT * 4;
+static const int quad_min_w   = TROID_WIDTH * 4;
+static const int quad_min_h   = TROID_HEIGHT * 4;
+static const int quad_max_len = 1;
 
 static void qt_set_quad_size(struct Quadtree* qt, float _x, float _y, float _w, float _h)
 {
@@ -57,6 +58,7 @@ static void qt_rearrange(struct Quadtree* qt, struct Quadtree* qt_root)
   struct Troid* crnt_troid = qt->troids;
   struct Troid* next_troid = NULL;
   qt->troids = NULL;
+  qt->len    = 0;
 
   while (crnt_troid != NULL)
   {
@@ -110,6 +112,9 @@ static bool qt_divid(struct Quadtree* qt)
 
   struct Troid* crnt_troid = qt->troids;
   struct Troid* next_troid = NULL;
+  qt->troids = NULL;
+  qt->len    = 0;
+
   while (crnt_troid != NULL)
   {
     next_troid = crnt_troid->next;
@@ -122,7 +127,6 @@ static bool qt_divid(struct Quadtree* qt)
     crnt_troid = next_troid;
   }
 
-  qt->troids = NULL;
   return true;
 }
 
@@ -138,6 +142,7 @@ struct Quadtree* qt_new(float _x, float _y, float _w, float _h)
   qt_set_quad_size(qt, _x, _y, _w, _h);
 
   qt->troids = NULL;
+  qt->len    = 0;
 
   qt->divided = false;
   qt->nw      = NULL;
@@ -161,14 +166,15 @@ bool qt_add(struct Quadtree* qt, struct Troid* troid)
     return false;
   }
 
-  if (qt->troids == NULL && !qt->divided)
-  {
-    qt->troids = troid_append(qt->troids, troid);
-    return true;
-  }
-
   if (!qt->divided)
   {
+    if (qt->len < quad_max_len || qt->real_dim.w < quad_min_w || qt->real_dim.h < quad_min_h)
+    {
+      qt->troids = troid_append(qt->troids, troid);
+      qt->len++;
+      return true;
+    }
+
     qt->divided = qt_divid(qt);
   }
 
@@ -194,23 +200,36 @@ void qt_update(struct Quadtree* qt)
     qt_update(qt->sw);
     qt_update(qt->se);
 
-    if (
-      qt->nw->troids == NULL && !qt->nw->divided &&
-      qt->ne->troids == NULL && !qt->ne->divided &&
-      qt->sw->troids == NULL && !qt->sw->divided &&
-      qt->se->troids == NULL && !qt->se->divided
-    )
+    if (!qt->nw->divided && !qt->ne->divided && !qt->sw->divided && !qt->se->divided)
     {
-      qt_free(qt->nw);
-      qt_free(qt->ne);
-      qt_free(qt->sw);
-      qt_free(qt->se);
+      int child_troid_count = qt->nw->len + qt->ne->len + qt->sw->len + qt->se->len;
+      if (child_troid_count <= quad_max_len)
+      {
+        if (child_troid_count != 0)
+        {
+          qt->troids = troid_append(qt->troids, qt->nw->troids);
+          qt->troids = troid_append(qt->troids, qt->ne->troids);
+          qt->troids = troid_append(qt->troids, qt->sw->troids);
+          qt->troids = troid_append(qt->troids, qt->se->troids);
+          qt->len    = child_troid_count;
 
-      qt->divided = false;
-      qt->nw      = NULL;
-      qt->ne      = NULL;
-      qt->sw      = NULL;
-      qt->se      = NULL;
+          qt->nw->troids = NULL;
+          qt->ne->troids = NULL;
+          qt->sw->troids = NULL;
+          qt->se->troids = NULL;
+        }
+
+        qt_free(qt->nw);
+        qt_free(qt->ne);
+        qt_free(qt->sw);
+        qt_free(qt->se);
+
+        qt->divided = false;
+        qt->nw      = NULL;
+        qt->ne      = NULL;
+        qt->sw      = NULL;
+        qt->se      = NULL;
+      }
     }
   }
 }
