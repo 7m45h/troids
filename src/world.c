@@ -3,6 +3,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
@@ -48,15 +49,11 @@ static void world_handle_events(struct World* world)
   {
     switch (world->event.type)
     {
-      case SDL_QUIT:
-      world->evolving = false;
-      break;
-
-      case SDL_KEYDOWN:
-      switch (world->event.key.keysym.sym)
+      case SDL_MOUSEBUTTONUP:
+      switch (world->event.button.button)
       {
-        case SDLK_q:
-        world->evolving = false;
+        case SDL_BUTTON_LEFT:
+        qt_add(world->qt, troid_new(world->event.button.x, world->event.button.y));
         break;
       }
       break;
@@ -68,6 +65,19 @@ static void world_handle_events(struct World* world)
         case SDL_WINDOWEVENT_SIZE_CHANGED:
         world->window_w = world->event.window.data1;
         world->window_h = world->event.window.data2;
+        break;
+      }
+      break;
+
+      case SDL_QUIT:
+      world->evolving = false;
+      break;
+
+      case SDL_KEYDOWN:
+      switch (world->event.key.keysym.sym)
+      {
+        case SDLK_q:
+        world->evolving = false;
         break;
       }
       break;
