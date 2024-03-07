@@ -158,7 +158,7 @@ void world_evolve(struct World* world)
   while (world->evolving)
   {
     world_handle_events(world);
-    qt_update(world->qt);
+    qt_update(world->qt, world->qt, world->window_w, world->window_h);
     world_render(world);
   }
 

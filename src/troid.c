@@ -34,8 +34,10 @@ struct Troid* troid_new(float _x, float _y)
     return NULL;
   }
 
-  troid->pos.x = _x;
-  troid->pos.y = _y;
+  troid->position.x = _x;
+  troid->position.y = _y;
+  troid->velocity.x = 1;
+  troid->velocity.y = 1;
 
   troid->src_rect.x = 0;
   troid->src_rect.y = 0;
@@ -77,6 +79,39 @@ struct Troid* troid_append(struct Troid* head, struct Troid* new_troid)
   head->next = new_troid;
 
   return head;
+}
+
+void troid_update(struct Troid* troid, float ww, float wh)
+{
+  struct Troid* crnt_troid = troid;
+  while (crnt_troid != NULL)
+  {
+    crnt_troid->position.x += crnt_troid->velocity.x;
+    crnt_troid->position.y += crnt_troid->velocity.y;
+
+    if (crnt_troid->position.x - texture_w_half < 0)
+    {
+      crnt_troid->position.x = ww - texture_w_half;
+    }
+    else if (crnt_troid->position.x + texture_w_half > ww)
+    {
+      crnt_troid->position.x = texture_w_half;
+    }
+
+    if (crnt_troid->position.y - texture_h_half < 0)
+    {
+      crnt_troid->position.y = wh - texture_h_half;
+    }
+    else if (crnt_troid->position.y + texture_h_half > wh)
+    {
+      crnt_troid->position.y = texture_h_half;
+    }
+
+    crnt_troid->dst_rect.x = crnt_troid->position.x;
+    crnt_troid->dst_rect.y = crnt_troid->position.y;
+
+    crnt_troid = crnt_troid->next;
+  }
 }
 
 void troid_render(struct Troid* troid, SDL_Renderer* renderer)

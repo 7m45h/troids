@@ -65,7 +65,7 @@ static void qt_rearrange(struct Quadtree* qt, struct Quadtree* qt_root)
     next_troid = crnt_troid->next;
     crnt_troid->next = NULL;
 
-    if (SDL_PointInFRect(&crnt_troid->pos, &qt->safe_dim))
+    if (SDL_PointInFRect(&crnt_troid->position, &qt->safe_dim))
     {
       qt_add(qt, crnt_troid);
     }
@@ -161,7 +161,7 @@ void qt_handle_window_resize(struct Quadtree* qt_root, float ww, float wh)
 
 bool qt_add(struct Quadtree* qt, struct Troid* troid)
 {
-  if (!SDL_PointInFRect(&troid->pos, &qt->safe_dim))
+  if (!SDL_PointInFRect(&troid->position, &qt->safe_dim))
   {
     return false;
   }
@@ -191,14 +191,17 @@ bool qt_add(struct Quadtree* qt, struct Troid* troid)
   return true;
 }
 
-void qt_update(struct Quadtree* qt)
+void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh)
 {
+  troid_update(qt->troids, ww, wh);
+  qt_rearrange(qt, qt_root);
+
   if (qt->divided)
   {
-    qt_update(qt->nw);
-    qt_update(qt->ne);
-    qt_update(qt->sw);
-    qt_update(qt->se);
+    qt_update(qt->nw, qt_root, ww, wh);
+    qt_update(qt->ne, qt_root, ww, wh);
+    qt_update(qt->sw, qt_root, ww, wh);
+    qt_update(qt->se, qt_root, ww, wh);
 
     if (!qt->nw->divided && !qt->ne->divided && !qt->sw->divided && !qt->se->divided)
     {
