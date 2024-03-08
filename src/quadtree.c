@@ -208,7 +208,7 @@ void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh
       int child_troid_count = qt->nw->len + qt->ne->len + qt->sw->len + qt->se->len;
       if (child_troid_count <= quad_max_len)
       {
-        if (child_troid_count != 0)
+        if (child_troid_count > 0)
         {
           qt->troids = troid_append(qt->troids, qt->nw->troids);
           qt->troids = troid_append(qt->troids, qt->ne->troids);

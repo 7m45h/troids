@@ -9,15 +9,15 @@
 
 struct Quadtree
 {
-  SDL_FRect real_dim;
-  SDL_FRect safe_dim;
+  SDL_FRect   real_dim;
+  SDL_FRect   safe_dim;
   struct Troid* troids;
-  int len;
-  bool divided;
-  struct Quadtree* nw;
-  struct Quadtree* ne;
-  struct Quadtree* sw;
-  struct Quadtree* se;
+  int              len;
+  bool         divided;
+  struct Quadtree*  nw;
+  struct Quadtree*  ne;
+  struct Quadtree*  sw;
+  struct Quadtree*  se;
 };
 
 struct Quadtree* qt_new(float _x, float _y, float _w, float _h);

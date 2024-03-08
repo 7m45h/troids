@@ -9,11 +9,13 @@
 
 struct Troid
 {
-  SDL_FPoint position;
+  int     direction_d;
+  float   direction_r;
   SDL_FPoint velocity;
-  SDL_Rect src_rect;
-  SDL_FRect dst_rect;
-  struct Troid* next;
+  SDL_FPoint position;
+  SDL_Rect   src_rect;
+  SDL_FRect  dst_rect;
+  struct Troid*  next;
 };
 
 int troid_init(SDL_Renderer* renderer);

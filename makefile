@@ -1,7 +1,7 @@
 CC := gcc
 CPPFLAGS := -MMD
 CFLAGS := -march=native
-LDFLAGS := -lSDL2 -lSDL2_image
+LDFLAGS := -lSDL2 -lSDL2_image -lm
 
 SRC_DIR := src
 OBJ_DIR := obj

@@ -1,17 +1,19 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include "inc/logger.h"
 #include "inc/troid.h"
 
-static const char texture_img_path[] = "./assets/troidtex_8x8.png";
-static SDL_Texture* texture          = NULL;
-static const float texture_w         = TROID_WIDTH;
-static const float texture_h         = TROID_HEIGHT;
-static const float texture_w_half    = texture_w * 0.5;
-static const float texture_h_half    = texture_h * 0.5;
+static const char texture_img_path[]     = "./assets/troidtex_8x8.png";
+static SDL_Texture* texture              = NULL;
+static const SDL_FPoint texture_dim      = { TROID_WIDTH, TROID_HEIGHT };
+static const SDL_FPoint texture_dim_half = { TROID_WIDTH * 0.5, TROID_HEIGHT * 0.5 };
+
+static const float one_deg_in_rad = M_PI / 180;
 
 int troid_init(SDL_Renderer* renderer)
 {
@@ -34,20 +36,23 @@ struct Troid* troid_new(float _x, float _y)
     return NULL;
   }
 
+  troid->direction_d = rand() % 360;
+  troid->direction_r = troid->direction_d * one_deg_in_rad;
+
+  troid->velocity.x = cosf(troid->direction_r);
+  troid->velocity.y = sinf(troid->direction_r);
   troid->position.x = _x;
   troid->position.y = _y;
-  troid->velocity.x = 1;
-  troid->velocity.y = 1;
 
   troid->src_rect.x = 0;
   troid->src_rect.y = 0;
-  troid->src_rect.w = texture_w;
-  troid->src_rect.h = texture_h;
+  troid->src_rect.w = texture_dim.x;
+  troid->src_rect.h = texture_dim.y;
 
-  troid->dst_rect.x = _x - texture_w_half;
-  troid->dst_rect.y = _y - texture_h_half;
-  troid->dst_rect.w = texture_w;
-  troid->dst_rect.h = texture_h;
+  troid->dst_rect.x = _x - texture_dim_half.x;
+  troid->dst_rect.y = _y - texture_dim_half.y;
+  troid->dst_rect.w = texture_dim.x;
+  troid->dst_rect.h = texture_dim.y;
 
   troid->next = NULL;
 
@@ -89,22 +94,22 @@ void troid_update(struct Troid* troid, float ww, float wh)
     crnt_troid->position.x += crnt_troid->velocity.x;
     crnt_troid->position.y += crnt_troid->velocity.y;
 
-    if (crnt_troid->position.x - texture_w_half < 0)
+    if (crnt_troid->position.x - texture_dim_half.x < 0)
     {
-      crnt_troid->position.x = ww - texture_w_half;
+      crnt_troid->position.x = ww - texture_dim_half.x;
     }
-    else if (crnt_troid->position.x + texture_w_half > ww)
+    else if (crnt_troid->position.x + texture_dim_half.x > ww)
     {
-      crnt_troid->position.x = texture_w_half;
+      crnt_troid->position.x = texture_dim_half.x;
     }
 
-    if (crnt_troid->position.y - texture_h_half < 0)
+    if (crnt_troid->position.y - texture_dim_half.y < 0)
     {
-      crnt_troid->position.y = wh - texture_h_half;
+      crnt_troid->position.y = wh - texture_dim_half.y;
     }
-    else if (crnt_troid->position.y + texture_h_half > wh)
+    else if (crnt_troid->position.y + texture_dim_half.y > wh)
     {
-      crnt_troid->position.y = texture_h_half;
+      crnt_troid->position.y = texture_dim_half.y;
     }
 
     crnt_troid->dst_rect.x = crnt_troid->position.x;
@@ -119,7 +124,7 @@ void troid_render(struct Troid* troid, SDL_Renderer* renderer)
   struct Troid* crnt_troid = troid;
   while (crnt_troid != NULL)
   {
-    SDL_RenderCopyF(renderer, texture, &crnt_troid->src_rect, &crnt_troid->dst_rect);
+    SDL_RenderCopyExF(renderer, texture, &crnt_troid->src_rect, &crnt_troid->dst_rect, troid->direction_d, &texture_dim_half, SDL_FLIP_NONE);
     crnt_troid = crnt_troid->next;
   }
 }

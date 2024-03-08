@@ -1,5 +1,7 @@
 #include "inc/logger.h"
 #include "inc/world.h"
+#include <stdlib.h>
+#include <time.h>
 
 #define TITLE "troids"
 
@@ -8,6 +10,8 @@
 
 int main(void)
 {
+  srand(time(NULL));
+
   struct World* world = world_form(TITLE, WINDOW_W, WINDOW_H);
   if (world == NULL)
   {

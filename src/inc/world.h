@@ -10,14 +10,14 @@
 
 struct World
 {
-  float window_w;
-  float window_h;
-  SDL_Window* window;
+  float         window_w;
+  float         window_h;
+  SDL_Window*     window;
   SDL_Renderer* renderer;
-  SDL_Event event;
-  bool evolving;
+  SDL_Event        event;
+  bool          evolving;
 
-  struct Quadtree* qt;
+  struct Quadtree*    qt;
 };
 
 struct World* world_form(const char* title, float w, float h);
