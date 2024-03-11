@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "inc/darray.h"
 #include "inc/logger.h"
 #include "inc/quadtree.h"
 #include "inc/troid.h"
@@ -237,11 +238,39 @@ void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh
   }
 }
 
+void qt_query(struct Quadtree* qt, SDL_FRect* range, struct Darray* results)
+{
+  if (SDL_HasIntersectionF(&qt->real_dim, range))
+  {
+    struct Troid* crnt_troid = qt->troids;
+    while (crnt_troid != NULL)
+    {
+      if (SDL_PointInFRect(&crnt_troid->position, range))
+      {
+        if (!da_add_item(results, crnt_troid))
+        {
+          logger(ERROR, __FILE_NAME__, __LINE__, "da add new item failed");
+        }
+      }
+
+      crnt_troid = crnt_troid->next;
+    }
+
+    if (qt->divided)
+    {
+      qt_query(qt->nw, range, results);
+      qt_query(qt->ne, range, results);
+      qt_query(qt->sw, range, results);
+      qt_query(qt->se, range, results);
+    }
+  }
+}
+
 void qt_render(struct Quadtree* qt, SDL_Renderer* renderer)
 {
-  SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, SDL_ALPHA_OPAQUE);
-  SDL_RenderDrawRectF(renderer, &qt->real_dim);
-  SDL_RenderDrawRectF(renderer, &qt->safe_dim);
+  // SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, SDL_ALPHA_OPAQUE);
+  // SDL_RenderDrawRectF(renderer, &qt->real_dim);
+  // SDL_RenderDrawRectF(renderer, &qt->safe_dim);
 
   if (qt->divided)
   {
