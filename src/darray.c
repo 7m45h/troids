@@ -37,8 +37,8 @@ bool da_add_item(struct Darray* darray, void* item)
 
   if (darray->len >= darray->cap)
   {
-    int new_cap      = darray->cap * 2;
-    void** new_space = realloc(darray->itmes, sizeof(void*) * darray->cap);
+    int new_cap      = darray->cap + DEFAULT_DARRAY_CAP;
+    void** new_space = realloc(darray->itmes, sizeof(void*) * new_cap);
     if (new_space == NULL)
     {
       logger(ERROR, __FILE_NAME__, __LINE__, "realloc darray items returned NULL");
