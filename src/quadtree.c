@@ -155,9 +155,9 @@ struct Quadtree* qt_new(float _x, float _y, float _w, float _h)
   return qt;
 }
 
-void qt_handle_window_resize(struct Quadtree* qt_root, float ww, float wh)
+void qt_handle_window_resize(struct Quadtree* qt_root, SDL_FRect* world_dim)
 {
-  qt_resize(qt_root, 0, 0, ww, wh);
+  qt_resize(qt_root, world_dim->x, world_dim->y, world_dim->w, world_dim->h);
   qt_rearrange(qt_root, qt_root);
 }
 
@@ -193,14 +193,14 @@ bool qt_add(struct Quadtree* qt, struct Troid* troid)
   return true;
 }
 
-void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh)
+void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, SDL_FRect* window_dim)
 {
   if (qt->divided)
   {
-    qt_update(qt->nw, qt_root, ww, wh);
-    qt_update(qt->ne, qt_root, ww, wh);
-    qt_update(qt->sw, qt_root, ww, wh);
-    qt_update(qt->se, qt_root, ww, wh);
+    qt_update(qt->nw, qt_root, window_dim);
+    qt_update(qt->ne, qt_root, window_dim);
+    qt_update(qt->sw, qt_root, window_dim);
+    qt_update(qt->se, qt_root, window_dim);
 
     if (!qt->nw->divided && !qt->ne->divided && !qt->sw->divided && !qt->se->divided)
     {
@@ -243,7 +243,7 @@ void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh
       qt_query_c(qt_root, &crnt_troid->position, TROID_PERCEPTION_RADIUS, crnt_troid->neighbors);
       crnt_troid = crnt_troid->next;
     }
-    troid_update(qt->troids, ww, wh);
+    troid_update(qt->troids, window_dim);
     qt_rearrange(qt, qt_root);
   }
 }

@@ -33,8 +33,6 @@ static const float alignment_factor  = 0.05;
 static const float cohesion_factor   = 0.0005;
 static const float turn_factor       = 1;
 
-static const int world_padding = 128;
-
 int troid_init(SDL_Renderer* renderer)
 {
   texture = IMG_LoadTexture(renderer, texture_img_path);
@@ -128,7 +126,7 @@ struct Troid* troid_append(struct Troid* head, struct Troid* new_troid)
   return head;
 }
 
-void troid_update(struct Troid* troid, float ww, float wh)
+void troid_update(struct Troid* troid, SDL_FRect* window_dim)
 {
   struct Troid* crnt_troid = troid;
   while (crnt_troid != NULL)
@@ -181,20 +179,20 @@ void troid_update(struct Troid* troid, float ww, float wh)
     crnt_troid->position.x += crnt_troid->velocity.x;
     crnt_troid->position.y += crnt_troid->velocity.y;
 
-    if (crnt_troid->position.x < world_padding)
+    if (crnt_troid->position.x < 0)
     {
       crnt_troid->velocity.x += turn_factor;
     }
-    else if (crnt_troid->position.x > ww - world_padding)
+    else if (crnt_troid->position.x > window_dim->w)
     {
       crnt_troid->velocity.x -= turn_factor;
     }
 
-    if (crnt_troid->position.y < world_padding)
+    if (crnt_troid->position.y < 0)
     {
       crnt_troid->velocity.y += turn_factor;
     }
-    else if (crnt_troid->position.y > wh - world_padding)
+    else if (crnt_troid->position.y > window_dim->h)
     {
       crnt_troid->velocity.y -= turn_factor;
     }

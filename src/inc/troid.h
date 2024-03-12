@@ -9,8 +9,8 @@
 #define TROID_WIDTH  8
 #define TROID_HEIGHT 8
 
-#define TROID_PERCEPTION_RADIUS 64
-#define TROID_PRIVATE_RADIUS    32
+#define TROID_PERCEPTION_RADIUS 128
+#define TROID_PRIVATE_RADIUS     16
 
 struct Troid
 {
@@ -29,7 +29,7 @@ struct Troid
 int troid_init(SDL_Renderer* renderer);
 struct Troid* troid_new(float _x, float _y);
 struct Troid* troid_append(struct Troid* head, struct Troid* new_troid);
-void troid_update(struct Troid* troid, float ww, float wh);
+void troid_update(struct Troid* troid, SDL_FRect* window_dim);
 void troid_render(struct Troid* troid, SDL_Renderer* renderer);
 void troid_free(struct Troid* troid);
 void troid_deinit(void);

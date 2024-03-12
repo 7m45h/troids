@@ -22,9 +22,9 @@ struct Quadtree
 };
 
 struct Quadtree* qt_new(float _x, float _y, float _w, float _h);
-void qt_handle_window_resize(struct Quadtree* qt_root, float ww, float wh);
+void qt_handle_window_resize(struct Quadtree* qt_root, SDL_FRect* world_dim);
 bool qt_add(struct Quadtree* qt, struct Troid* troid);
-void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh);
+void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, SDL_FRect* window_dim);
 void qt_query_r(struct Quadtree* qt, SDL_FRect* range, struct Darray* results);
 void qt_query_c(struct Quadtree* qt, SDL_FPoint* center, int radius, struct Darray* results);
 void qt_render(struct Quadtree* qt, SDL_Renderer* renderer);

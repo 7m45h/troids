@@ -25,7 +25,7 @@
 
 static bool world_init(struct World* world)
 {
-  world->qt = qt_new(0, 0, world->window_w, world->window_h);
+  world->qt = qt_new(world->world_dim.x, world->world_dim.y, world->world_dim.h, world->world_dim.w);
   if (world->qt == NULL)
   {
     logger(ERROR, __FILE_NAME__, __LINE__, "qt_new returned NULL");
@@ -87,9 +87,11 @@ static void world_handle_events(struct World* world)
       {
         case SDL_WINDOWEVENT_RESIZED:
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-        world->window_w = world->event.window.data1;
-        world->window_h = world->event.window.data2;
-        qt_handle_window_resize(world->qt, world->window_w, world->window_h);
+        world->window_dim.w = world->event.window.data1;
+        world->window_dim.h = world->event.window.data2;
+        world->world_dim.w  = world->event.window.data1 + WORLD_PADDING_DOUBLE;
+        world->world_dim.h  = world->event.window.data2 + WORLD_PADDING_DOUBLE;
+        qt_handle_window_resize(world->qt, &world->world_dim);
         break;
       }
       break;
@@ -157,8 +159,14 @@ struct World* world_form(const char* title, float w, float h)
     return NULL;
   }
 
-  world->window_w = w;
-  world->window_h = h;
+  world->window_dim.x = 0;
+  world->window_dim.y = 0;
+  world->window_dim.w = w;
+  world->window_dim.h = h;
+  world->world_dim.x  = 0 - WORLD_PADDING;
+  world->world_dim.y  = 0 - WORLD_PADDING;
+  world->world_dim.w  = w + WORLD_PADDING_DOUBLE;
+  world->world_dim.h  = h + WORLD_PADDING_DOUBLE;
 
   world->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
   if (world->window == NULL)
@@ -194,7 +202,7 @@ void world_evolve(struct World* world)
   {
     world_handle_events(world);
     // da_empty(scanner_results);
-    qt_update(world->qt, world->qt, world->window_w, world->window_h);
+    qt_update(world->qt, world->qt, &world->window_dim);
     // qt_query_r(world->qt, &scanner_rect, scanner_results);
     world_render(world);
   }
