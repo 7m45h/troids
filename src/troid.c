@@ -13,12 +13,25 @@ static SDL_Texture* texture              = NULL;
 static const SDL_FPoint texture_dim      = { TROID_WIDTH, TROID_HEIGHT };
 static const SDL_FPoint texture_dim_half = { TROID_WIDTH * 0.5, TROID_HEIGHT * 0.5 };
 
+static const char scan_range_texture_img_path[]   = "./assets/troid_scan_rangetex_64x64.png";
+static SDL_Texture* scan_range_texture            = NULL;
+static const int scan_range_texture_dim           = 64;
+static const int scan_range_texture_dim_half      = scan_range_texture_dim * 0.5;
+static const SDL_Rect scan_range_texture_src_rect = {0, 0, scan_range_texture_dim, scan_range_texture_dim};
+
 static const float one_deg_in_rad = M_PI / 180;
 
 int troid_init(SDL_Renderer* renderer)
 {
   texture = IMG_LoadTexture(renderer, texture_img_path);
   if (texture == NULL)
+  {
+    logger(ERROR, __FILE_NAME__, __LINE__, IMG_GetError());
+    return 1;
+  }
+
+  scan_range_texture = IMG_LoadTexture(renderer, scan_range_texture_img_path);
+  if (scan_range_texture == NULL)
   {
     logger(ERROR, __FILE_NAME__, __LINE__, IMG_GetError());
     return 1;
@@ -53,6 +66,11 @@ struct Troid* troid_new(float _x, float _y)
   troid->dst_rect.y = _y - texture_dim_half.y;
   troid->dst_rect.w = texture_dim.x;
   troid->dst_rect.h = texture_dim.y;
+
+  troid->scan_range_dst_rect.x = _x - scan_range_texture_dim_half;
+  troid->scan_range_dst_rect.y = _y - scan_range_texture_dim_half;
+  troid->scan_range_dst_rect.w = scan_range_texture_dim;
+  troid->scan_range_dst_rect.h = scan_range_texture_dim;
 
   troid->next = NULL;
 
@@ -112,8 +130,11 @@ void troid_update(struct Troid* troid, float ww, float wh)
       crnt_troid->position.y = texture_dim_half.y;
     }
 
-    crnt_troid->dst_rect.x = crnt_troid->position.x;
-    crnt_troid->dst_rect.y = crnt_troid->position.y;
+    crnt_troid->dst_rect.x = crnt_troid->position.x - texture_dim_half.x;
+    crnt_troid->dst_rect.y = crnt_troid->position.y - texture_dim_half.y;
+
+    crnt_troid->scan_range_dst_rect.x = crnt_troid->position.x - scan_range_texture_dim_half;
+    crnt_troid->scan_range_dst_rect.y = crnt_troid->position.y - scan_range_texture_dim_half;
 
     crnt_troid = crnt_troid->next;
   }
@@ -125,6 +146,7 @@ void troid_render(struct Troid* troid, SDL_Renderer* renderer)
   while (crnt_troid != NULL)
   {
     SDL_RenderCopyExF(renderer, texture, &crnt_troid->src_rect, &crnt_troid->dst_rect, troid->direction_d, &texture_dim_half, SDL_FLIP_NONE);
+    SDL_RenderCopyF(renderer, scan_range_texture, &scan_range_texture_src_rect, &crnt_troid->scan_range_dst_rect);
     crnt_troid = crnt_troid->next;
   }
 }
@@ -144,5 +166,6 @@ void troid_free(struct Troid* troid)
 
 void troid_deinit(void)
 {
+  SDL_DestroyTexture(scan_range_texture);
   SDL_DestroyTexture(texture);
 }
