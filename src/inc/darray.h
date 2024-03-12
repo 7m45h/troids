@@ -6,8 +6,8 @@
 
 struct Darray
 {
-  int cap;
-  int len;
+  int      cap;
+  int      len;
   void** itmes;
 };
 

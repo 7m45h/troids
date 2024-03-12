@@ -63,7 +63,7 @@ static void qt_rearrange(struct Quadtree* qt, struct Quadtree* qt_root)
 
   while (crnt_troid != NULL)
   {
-    next_troid = crnt_troid->next;
+    next_troid       = crnt_troid->next;
     crnt_troid->next = NULL;
 
     if (SDL_PointInFRect(&crnt_troid->position, &qt->safe_dim))
@@ -118,7 +118,7 @@ static bool qt_divid(struct Quadtree* qt)
 
   while (crnt_troid != NULL)
   {
-    next_troid = crnt_troid->next;
+    next_troid       = crnt_troid->next;
     crnt_troid->next = NULL;
     if (!qt_add_to_branch(qt, crnt_troid))
     {

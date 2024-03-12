@@ -81,7 +81,7 @@ struct Troid* troid_append(struct Troid* head, struct Troid* new_troid)
   }
 
   crnt_troid->next = head->next;
-  head->next = new_troid;
+  head->next       = new_troid;
 
   return head;
 }
