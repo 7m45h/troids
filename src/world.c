@@ -11,17 +11,17 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "inc/darray.h"
+// #include "inc/darray.h"
 #include "inc/logger.h"
 #include "inc/quadtree.h"
 #include "inc/troid.h"
 #include "inc/world.h"
 
-static const int scanner_dim             = 256;
-static const int scanner_dim_half        = scanner_dim * 0.5;
-static SDL_FRect scanner_rect            = { 0, 0, 256, 256 };
-static struct Darray* scanner_results    = NULL;
-static struct Troid* scanner_result_item = NULL;
+// static const int scanner_dim             = 256;
+// static const int scanner_dim_half        = scanner_dim * 0.5;
+// static SDL_FRect scanner_rect            = { 0, 0, 256, 256 };
+// static struct Darray* scanner_results    = NULL;
+// static struct Troid* scanner_result_item = NULL;
 
 static bool world_init(struct World* world)
 {
@@ -39,12 +39,12 @@ static bool world_init(struct World* world)
     return false;
   }
 
-  scanner_results = da_new(DEFAULT_DARRAY_CAP);
-  if (scanner_results == NULL)
-  {
-    logger(ERROR, __FILE_NAME__, __LINE__, "darray init failed");
-    return false;
-  }
+  // scanner_results = da_new(DEFAULT_DARRAY_CAP);
+  // if (scanner_results == NULL)
+  // {
+  //   logger(ERROR, __FILE_NAME__, __LINE__, "darray init failed");
+  //   return false;
+  // }
 
   return true;
 }
@@ -56,10 +56,10 @@ static void world_deinit(struct World* world)
   {
     qt_free(world->qt);
   }
-  if (scanner_results != NULL)
-  {
-    da_free(scanner_results);
-  }
+  // if (scanner_results != NULL)
+  // {
+  //   da_free(scanner_results);
+  // }
 }
 
 static void world_handle_events(struct World* world)
@@ -68,10 +68,10 @@ static void world_handle_events(struct World* world)
   {
     switch (world->event.type)
     {
-      case SDL_MOUSEMOTION:
-      scanner_rect.x = world->event.motion.x - scanner_dim_half;
-      scanner_rect.y = world->event.motion.y - scanner_dim_half;
-      break;
+      // case SDL_MOUSEMOTION:
+      // scanner_rect.x = world->event.motion.x - scanner_dim_half;
+      // scanner_rect.y = world->event.motion.y - scanner_dim_half;
+      // break;
 
       case SDL_MOUSEBUTTONUP:
       switch (world->event.button.button)
@@ -115,17 +115,18 @@ static void world_render(struct World* world)
   SDL_SetRenderDrawColor(world->renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
   SDL_RenderClear(world->renderer);
 
+  SDL_SetRenderDrawColor(world->renderer, 0xff, 0x00, 0x00, SDL_ALPHA_OPAQUE);
   qt_render(world->qt, world->renderer);
 
-  SDL_SetRenderDrawColor(world->renderer, 0xff, 0x00, 0x00, SDL_ALPHA_OPAQUE);
-  for (int i = 0; i < scanner_results->len; i++)
-  {
-    scanner_result_item = (struct Troid*) scanner_results->itmes[i];
-    SDL_RenderDrawRectF(world->renderer, &scanner_result_item->dst_rect);
-  }
+  // SDL_SetRenderDrawColor(world->renderer, 0xff, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+  // for (int i = 0; i < scanner_results->len; i++)
+  // {
+  //   scanner_result_item = (struct Troid*) scanner_results->itmes[i];
+  //   SDL_RenderDrawRectF(world->renderer, &scanner_result_item->dst_rect);
+  // }
 
-  SDL_SetRenderDrawColor(world->renderer, 0x00, 0xff, 0x00, SDL_ALPHA_OPAQUE);
-  SDL_RenderDrawRectF(world->renderer, &scanner_rect);
+  // SDL_SetRenderDrawColor(world->renderer, 0x00, 0xff, 0x00, SDL_ALPHA_OPAQUE);
+  // SDL_RenderDrawRectF(world->renderer, &scanner_rect);
 
   SDL_RenderPresent(world->renderer);
 }
@@ -192,9 +193,9 @@ void world_evolve(struct World* world)
   while (world->evolving)
   {
     world_handle_events(world);
-    da_empty(scanner_results);
+    // da_empty(scanner_results);
     qt_update(world->qt, world->qt, world->window_w, world->window_h);
-    qt_query(world->qt, &scanner_rect, scanner_results);
+    // qt_query_r(world->qt, &scanner_rect, scanner_results);
     world_render(world);
   }
 

@@ -4,8 +4,12 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 
+#include "darray.h"
+
 #define TROID_WIDTH  8
 #define TROID_HEIGHT 8
+
+#define TROID_PERCEPTION_RADIUS 32
 
 struct Troid
 {
@@ -16,6 +20,7 @@ struct Troid
   SDL_Rect             src_rect;
   SDL_FRect            dst_rect;
   SDL_FRect scan_range_dst_rect;
+  struct Darray*      neighbors;
   struct Troid*            next;
 };
 

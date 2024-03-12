@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "inc/darray.h"
+#include "inc/geom.h"
 #include "inc/logger.h"
 #include "inc/quadtree.h"
 #include "inc/troid.h"
@@ -194,9 +195,6 @@ bool qt_add(struct Quadtree* qt, struct Troid* troid)
 
 void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh)
 {
-  troid_update(qt->troids, ww, wh);
-  qt_rearrange(qt, qt_root);
-
   if (qt->divided)
   {
     qt_update(qt->nw, qt_root, ww, wh);
@@ -236,9 +234,21 @@ void qt_update(struct Quadtree* qt, struct Quadtree* qt_root, float ww, float wh
       }
     }
   }
+  else
+  {
+    struct Troid* crnt_troid = qt->troids;
+    while (crnt_troid != NULL)
+    {
+      da_empty(crnt_troid->neighbors);
+      qt_query_c(qt_root, &crnt_troid->position, TROID_PERCEPTION_RADIUS, crnt_troid->neighbors);
+      crnt_troid = crnt_troid->next;
+    }
+    troid_update(qt->troids, ww, wh);
+    qt_rearrange(qt, qt_root);
+  }
 }
 
-void qt_query(struct Quadtree* qt, SDL_FRect* range, struct Darray* results)
+void qt_query_r(struct Quadtree* qt, SDL_FRect* range, struct Darray* results)
 {
   if (SDL_HasIntersectionF(&qt->real_dim, range))
   {
@@ -258,10 +268,38 @@ void qt_query(struct Quadtree* qt, SDL_FRect* range, struct Darray* results)
 
     if (qt->divided)
     {
-      qt_query(qt->nw, range, results);
-      qt_query(qt->ne, range, results);
-      qt_query(qt->sw, range, results);
-      qt_query(qt->se, range, results);
+      qt_query_r(qt->nw, range, results);
+      qt_query_r(qt->ne, range, results);
+      qt_query_r(qt->sw, range, results);
+      qt_query_r(qt->se, range, results);
+    }
+  }
+}
+
+void qt_query_c(struct Quadtree* qt, SDL_FPoint* center, int radius, struct Darray* results)
+{
+  if (gm_is_intersect_rc(&qt->real_dim, center, radius))
+  {
+    struct Troid* crnt_troid = qt->troids;
+    while (crnt_troid != NULL)
+    {
+      if (gm_is_inrange_cp(center, radius, &crnt_troid->position))
+      {
+        if (!da_add_item(results, crnt_troid))
+        {
+          logger(ERROR, __FILE_NAME__, __LINE__, "da add new item failed");
+        }
+      }
+
+      crnt_troid = crnt_troid->next;
+    }
+
+    if (qt->divided)
+    {
+      qt_query_c(qt->nw, center, radius, results);
+      qt_query_c(qt->ne, center, radius, results);
+      qt_query_c(qt->sw, center, radius, results);
+      qt_query_c(qt->se, center, radius, results);
     }
   }
 }

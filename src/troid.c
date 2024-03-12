@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "inc/darray.h"
 #include "inc/logger.h"
 #include "inc/troid.h"
 
@@ -15,9 +16,10 @@ static const SDL_FPoint texture_dim_half = { TROID_WIDTH * 0.5, TROID_HEIGHT * 0
 
 static const char scan_range_texture_img_path[]   = "./assets/troid_scan_rangetex_64x64.png";
 static SDL_Texture* scan_range_texture            = NULL;
-static const int scan_range_texture_dim           = 64;
-static const int scan_range_texture_dim_half      = scan_range_texture_dim * 0.5;
-static const SDL_Rect scan_range_texture_src_rect = {0, 0, scan_range_texture_dim, scan_range_texture_dim};
+static const int scan_range_texture_dim           = TROID_PERCEPTION_RADIUS * 2;
+static const int scan_range_texture_dim_half      = TROID_PERCEPTION_RADIUS;
+static const SDL_Rect scan_range_texture_src_rect = {0, 0, 64, 64};
+static struct Troid* neighbor                     = NULL;
 
 static const float one_deg_in_rad = M_PI / 180;
 
@@ -72,6 +74,14 @@ struct Troid* troid_new(float _x, float _y)
   troid->scan_range_dst_rect.w = scan_range_texture_dim;
   troid->scan_range_dst_rect.h = scan_range_texture_dim;
 
+  troid->neighbors = da_new(DEFAULT_DARRAY_CAP);
+  if (troid->neighbors == NULL)
+  {
+    logger(ERROR, __FILE_NAME__, __LINE__, "create new darray failed");
+    free(troid);
+    return NULL;
+  }
+
   troid->next = NULL;
 
   return troid;
@@ -109,6 +119,15 @@ void troid_update(struct Troid* troid, float ww, float wh)
   struct Troid* crnt_troid = troid;
   while (crnt_troid != NULL)
   {
+    for (int i = 0; i < crnt_troid->neighbors->len; i++)
+    {
+      if (crnt_troid->neighbors->itmes[i] == crnt_troid)
+      {
+        da_remove(crnt_troid->neighbors, i);
+        break;
+      }
+    }
+
     crnt_troid->position.x += crnt_troid->velocity.x;
     crnt_troid->position.y += crnt_troid->velocity.y;
 
@@ -147,6 +166,11 @@ void troid_render(struct Troid* troid, SDL_Renderer* renderer)
   {
     SDL_RenderCopyExF(renderer, texture, &crnt_troid->src_rect, &crnt_troid->dst_rect, troid->direction_d, &texture_dim_half, SDL_FLIP_NONE);
     SDL_RenderCopyF(renderer, scan_range_texture, &scan_range_texture_src_rect, &crnt_troid->scan_range_dst_rect);
+    for (int i = 0; i < crnt_troid->neighbors->len; i++)
+    {
+      neighbor = crnt_troid->neighbors->itmes[i];
+      SDL_RenderDrawRectF(renderer, &neighbor->dst_rect);
+    }
     crnt_troid = crnt_troid->next;
   }
 }
@@ -159,6 +183,7 @@ void troid_free(struct Troid* troid)
   while (crnt_troid != NULL)
   {
     next_troid = crnt_troid->next;
+    da_free(crnt_troid->neighbors);
     free(crnt_troid);
     crnt_troid = next_troid;
   }

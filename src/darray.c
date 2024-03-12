@@ -53,6 +53,22 @@ bool da_add_item(struct Darray* darray, void* item)
   return true;
 }
 
+void da_remove(struct Darray* darray, int index)
+{
+  if (index > darray->len)
+  {
+    logger(ERROR, __FILE_NAME__, __LINE__, "index out of bound");
+    return;
+  }
+
+  darray->len--;
+  while (index < darray->len)
+  {
+    darray->itmes[index] = darray->itmes[index + 1];
+    index++;
+  }
+}
+
 void da_empty(struct Darray* darray)
 {
   while (darray->len > 0)
