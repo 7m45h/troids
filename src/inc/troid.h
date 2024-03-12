@@ -9,17 +9,19 @@
 #define TROID_WIDTH  8
 #define TROID_HEIGHT 8
 
-#define TROID_PERCEPTION_RADIUS 32
+#define TROID_PERCEPTION_RADIUS 64
+#define TROID_PRIVATE_RADIUS    32
 
 struct Troid
 {
   int               direction_d;
   float             direction_r;
+  SDL_FPoint       acceleration;
   SDL_FPoint           velocity;
   SDL_FPoint           position;
   SDL_Rect             src_rect;
   SDL_FRect            dst_rect;
-  SDL_FRect scan_range_dst_rect;
+  // SDL_FRect scan_range_dst_rect;
   struct Darray*      neighbors;
   struct Troid*            next;
 };
