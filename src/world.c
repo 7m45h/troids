@@ -106,6 +106,11 @@ static void world_handle_events(struct World* world)
       case SDL_KEYDOWN:
       switch (world->event.key.keysym.sym)
       {
+        case SDLK_f:
+        world->windowed = !world->windowed;
+        SDL_SetWindowFullscreen(world->window, world->windowed ? 0 : SDL_WINDOW_FULLSCREEN);
+        break;
+
         case SDLK_q:
         world->evolving = false;
         break;
@@ -192,6 +197,7 @@ struct World* world_form(const char* title, float w, float h)
     return NULL;
   }
 
+  world->windowed = true;
   world->evolving = false;
 
   return world;
