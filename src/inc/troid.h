@@ -9,8 +9,8 @@
 #define TROID_WIDTH  8
 #define TROID_HEIGHT 8
 
-#define TROID_PERCEPTION_RADIUS 128
-#define TROID_PRIVATE_RADIUS     16
+#define TROID_PERCEPTION_RADIUS 64
+#define TROID_PRIVATE_RADIUS    16
 
 struct Troid
 {

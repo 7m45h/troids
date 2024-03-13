@@ -31,7 +31,7 @@ static const float one_rad_in_deg = 180 / M_PI;
 static const float separation_factor = 0.05;
 static const float alignment_factor  = 0.05;
 static const float cohesion_factor   = 0.0005;
-static const float turn_factor       = 1;
+static const float turn_factor       = 0.5;
 
 int troid_init(SDL_Renderer* renderer)
 {
@@ -179,20 +179,20 @@ void troid_update(struct Troid* troid, SDL_FRect* window_dim)
     crnt_troid->position.x += crnt_troid->velocity.x;
     crnt_troid->position.y += crnt_troid->velocity.y;
 
-    if (crnt_troid->position.x < 0)
+    if (crnt_troid->position.x < TROID_PERCEPTION_RADIUS)
     {
       crnt_troid->velocity.x += turn_factor;
     }
-    else if (crnt_troid->position.x > window_dim->w)
+    else if (crnt_troid->position.x > window_dim->w - TROID_PERCEPTION_RADIUS)
     {
       crnt_troid->velocity.x -= turn_factor;
     }
 
-    if (crnt_troid->position.y < 0)
+    if (crnt_troid->position.y < TROID_PERCEPTION_RADIUS)
     {
       crnt_troid->velocity.y += turn_factor;
     }
-    else if (crnt_troid->position.y > window_dim->h)
+    else if (crnt_troid->position.y > window_dim->h - TROID_PERCEPTION_RADIUS)
     {
       crnt_troid->velocity.y -= turn_factor;
     }
