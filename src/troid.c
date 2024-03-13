@@ -22,13 +22,14 @@ static const SDL_FPoint texture_dim_half = { TROID_WIDTH * 0.5, TROID_HEIGHT * 0
 // static const SDL_Rect scan_range_texture_src_rect = {0, 0, 64, 64};
 
 static struct Troid* neighbor            = NULL;
+static int same_tribe_neighbor_cound     = 0;
 static SDL_FPoint neighbors_avg_velocity = {0, 0};
 static SDL_FPoint neighbors_avg_position = {0, 0};
 
 static const float one_deg_in_rad = M_PI / 180;
 static const float one_rad_in_deg = 180 / M_PI;
 
-static const float separation_factor = 0.05;
+static const float separation_factor = 0.005;
 static const float alignment_factor  = 0.05;
 static const float cohesion_factor   = 0.0005;
 static const float turn_factor       = 0.5;
@@ -71,6 +72,8 @@ struct Troid* troid_new(float _x, float _y)
     return NULL;
   }
 
+  troid->tribe = (enum Tribe) rand() % TRIBE_COUNT;
+
   troid->direction_d = rand() % 360;
   troid->direction_r = troid->direction_d * one_deg_in_rad;
 
@@ -81,7 +84,7 @@ struct Troid* troid_new(float _x, float _y)
   troid->position.x     = _x;
   troid->position.y     = _y;
 
-  troid->src_rect.x = 0;
+  troid->src_rect.x = TROID_WIDTH * (int) troid->tribe;
   troid->src_rect.y = 0;
   troid->src_rect.w = texture_dim.x;
   troid->src_rect.h = texture_dim.y;
@@ -150,6 +153,7 @@ void troid_update(struct Troid* troid)
       }
     }
 
+    same_tribe_neighbor_cound  = 0;
     neighbors_avg_position.x   = 0;
     neighbors_avg_position.y   = 0;
     neighbors_avg_velocity.x   = 0;
@@ -160,18 +164,27 @@ void troid_update(struct Troid* troid)
     for (int i = 0; i < crnt_troid->neighbors->len; i++)
     {
       neighbor = crnt_troid->neighbors->itmes[i];
-      if (gm_is_inrange_cp(&crnt_troid->position, TROID_PRIVATE_RADIUS, &neighbor->position))
+      if (neighbor->tribe == crnt_troid->tribe)
+      {
+        same_tribe_neighbor_cound++;
+        if (gm_is_inrange_cp(&crnt_troid->position, TROID_PRIVATE_RADIUS, &neighbor->position))
+        {
+          crnt_troid->acceleration.x += (crnt_troid->position.x - neighbor->position.x) * separation_factor;
+          crnt_troid->acceleration.y += (crnt_troid->position.y - neighbor->position.y) * separation_factor;
+        }
+        neighbors_avg_velocity.x += neighbor->velocity.x;
+        neighbors_avg_velocity.y += neighbor->velocity.y;
+        neighbors_avg_position.x += neighbor->position.x;
+        neighbors_avg_position.y += neighbor->position.y;
+      }
+      else
       {
         crnt_troid->acceleration.x += (crnt_troid->position.x - neighbor->position.x) * separation_factor;
         crnt_troid->acceleration.y += (crnt_troid->position.y - neighbor->position.y) * separation_factor;
       }
-      neighbors_avg_velocity.x += neighbor->velocity.x;
-      neighbors_avg_velocity.y += neighbor->velocity.y;
-      neighbors_avg_position.x += neighbor->position.x;
-      neighbors_avg_position.y += neighbor->position.y;
     }
 
-    if (crnt_troid->neighbors->len > 0)
+    if (same_tribe_neighbor_cound > 0)
     {
       neighbors_avg_velocity.x = neighbors_avg_velocity.x / crnt_troid->neighbors->len;
       neighbors_avg_velocity.y = neighbors_avg_velocity.y / crnt_troid->neighbors->len;

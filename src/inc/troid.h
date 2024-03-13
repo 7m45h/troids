@@ -12,8 +12,19 @@
 #define TROID_PERCEPTION_RADIUS 64
 #define TROID_PRIVATE_RADIUS    16
 
+#define TRIBE_COUNT 4
+
+enum Tribe
+{
+  RED,
+  GREEN,
+  BLUE,
+  WHITE
+};
+
 struct Troid
 {
+  enum Tribe              tribe;
   int               direction_d;
   float             direction_r;
   SDL_FPoint       acceleration;
