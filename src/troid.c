@@ -33,6 +33,16 @@ static const float alignment_factor  = 0.05;
 static const float cohesion_factor   = 0.0005;
 static const float turn_factor       = 0.5;
 
+static SDL_FRect swim_area = {0, 0, 0, 0};
+
+void troid_set_swim_area(SDL_FRect* window_dim)
+{
+  swim_area.x = window_dim->x + TROID_PERCEPTION_RADIUS;
+  swim_area.y = window_dim->y + TROID_PERCEPTION_RADIUS;
+  swim_area.w = window_dim->w - TROID_PERCEPTION_RADIUS;
+  swim_area.h = window_dim->h - TROID_PERCEPTION_RADIUS;
+}
+
 int troid_init(SDL_Renderer* renderer)
 {
   texture = IMG_LoadTexture(renderer, texture_img_path);
@@ -126,7 +136,7 @@ struct Troid* troid_append(struct Troid* head, struct Troid* new_troid)
   return head;
 }
 
-void troid_update(struct Troid* troid, SDL_FRect* window_dim)
+void troid_update(struct Troid* troid)
 {
   struct Troid* crnt_troid = troid;
   while (crnt_troid != NULL)
@@ -179,20 +189,20 @@ void troid_update(struct Troid* troid, SDL_FRect* window_dim)
     crnt_troid->position.x += crnt_troid->velocity.x;
     crnt_troid->position.y += crnt_troid->velocity.y;
 
-    if (crnt_troid->position.x < TROID_PERCEPTION_RADIUS)
+    if (crnt_troid->position.x < swim_area.x)
     {
       crnt_troid->velocity.x += turn_factor;
     }
-    else if (crnt_troid->position.x > window_dim->w - TROID_PERCEPTION_RADIUS)
+    else if (crnt_troid->position.x > swim_area.w)
     {
       crnt_troid->velocity.x -= turn_factor;
     }
 
-    if (crnt_troid->position.y < TROID_PERCEPTION_RADIUS)
+    if (crnt_troid->position.y < swim_area.y)
     {
       crnt_troid->velocity.y += turn_factor;
     }
-    else if (crnt_troid->position.y > window_dim->h - TROID_PERCEPTION_RADIUS)
+    else if (crnt_troid->position.y > swim_area.h)
     {
       crnt_troid->velocity.y -= turn_factor;
     }

@@ -46,6 +46,8 @@ static bool world_init(struct World* world)
   //   return false;
   // }
 
+  troid_set_swim_area(&world->window_dim);
+
   return true;
 }
 
@@ -91,6 +93,7 @@ static void world_handle_events(struct World* world)
         world->window_dim.h = world->event.window.data2;
         world->world_dim.w  = world->event.window.data1 + WORLD_PADDING_DOUBLE;
         world->world_dim.h  = world->event.window.data2 + WORLD_PADDING_DOUBLE;
+        troid_set_swim_area(&world->window_dim);
         qt_handle_window_resize(world->qt, &world->world_dim);
         break;
       }
@@ -202,7 +205,7 @@ void world_evolve(struct World* world)
   {
     world_handle_events(world);
     // da_empty(scanner_results);
-    qt_update(world->qt, world->qt, &world->window_dim);
+    qt_update(world->qt, world->qt);
     // qt_query_r(world->qt, &scanner_rect, scanner_results);
     world_render(world);
   }

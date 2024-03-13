@@ -29,7 +29,8 @@ struct Troid
 int troid_init(SDL_Renderer* renderer);
 struct Troid* troid_new(float _x, float _y);
 struct Troid* troid_append(struct Troid* head, struct Troid* new_troid);
-void troid_update(struct Troid* troid, SDL_FRect* window_dim);
+void troid_set_swim_area(SDL_FRect* window_dim);
+void troid_update(struct Troid* troid);
 void troid_render(struct Troid* troid, SDL_Renderer* renderer);
 void troid_free(struct Troid* troid);
 void troid_deinit(void);
