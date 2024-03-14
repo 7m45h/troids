@@ -79,7 +79,12 @@ static void world_handle_events(struct World* world)
       switch (world->event.button.button)
       {
         case SDL_BUTTON_LEFT:
-        qt_add(world->qt, troid_new(world->event.button.x, world->event.button.y));
+        for (int i = 0; i < 10; i++)
+        {
+          int rand_x = (rand() % 256) - 128;
+          int rand_y = (rand() % 256) - 128;
+          qt_add(world->qt, troid_new(world->event.button.x + rand_x, world->event.button.y + rand_y));
+        }
         break;
       }
       break;
