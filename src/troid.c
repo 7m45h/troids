@@ -163,7 +163,7 @@ void troid_update(struct Troid* troid)
 
     for (int i = 0; i < crnt_troid->neighbors->len; i++)
     {
-      neighbor = crnt_troid->neighbors->itmes[i];
+      neighbor = (struct Troid*) crnt_troid->neighbors->itmes[i];
       if (neighbor->tribe == crnt_troid->tribe)
       {
         same_tribe_neighbor_cound++;
