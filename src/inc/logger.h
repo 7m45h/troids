@@ -3,7 +3,8 @@
 enum LogType
 {
   INFO,
-  ERROR
+  ERROR,
+  WARNING
 };
 
 void logger(enum LogType type, const char* file, const int line, const char* msg);

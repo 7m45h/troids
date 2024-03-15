@@ -31,7 +31,7 @@ bool da_add_item(struct Darray* darray, void* item)
 {
   if (item == NULL)
   {
-    logger(ERROR, __FILE_NAME__, __LINE__, "recived NULL items for darray add");
+    logger(WARNING, __FILE_NAME__, __LINE__, "recived NULL items for darray add");
     return false;
   }
 

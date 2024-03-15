@@ -2,7 +2,7 @@
 
 #include "inc/logger.h"
 
-static const char* icon[2] = { "info", "error" };
+static const char* icon[] = { "info", "error", "warning" };
 
 void logger(enum LogType type, const char* file, const int line, const char* msg)
 {

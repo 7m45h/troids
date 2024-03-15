@@ -75,7 +75,7 @@ static void qt_rearrange(struct Quadtree* qt, struct Quadtree* qt_root)
     {
       if(!qt_add(qt_root, crnt_troid))
       {
-        logger(ERROR, __FILE_NAME__, __LINE__, "troid not accepted by root quad");
+        logger(WARNING, __FILE_NAME__, __LINE__, "troid not accepted by root quad");
         troid_free(crnt_troid);
       }
     }
@@ -123,7 +123,7 @@ static bool qt_divid(struct Quadtree* qt)
     crnt_troid->next = NULL;
     if (!qt_add_to_branch(qt, crnt_troid))
     {
-      logger(ERROR, __FILE_NAME__, __LINE__, "troid not accepted by any branch");
+      logger(WARNING, __FILE_NAME__, __LINE__, "troid not accepted by any branch");
       troid_free(crnt_troid);
     }
     crnt_troid = next_troid;
@@ -188,7 +188,7 @@ bool qt_add(struct Quadtree* qt, struct Troid* troid)
     }
   }
 
-  logger(ERROR, __FILE_NAME__, __LINE__, "troid not accepted");
+  logger(WARNING, __FILE_NAME__, __LINE__, "troid not accepted");
   troid_free(troid);
   return true;
 }
